@@ -791,6 +791,7 @@ function addIngredient(item) {
   inp.focus();
 }
 
+
 async function cookFromFridge() {
   const ingredients = document.getElementById('fridge-input').value.trim();
   if (!ingredients) { alert('Please add some ingredients first! 🥕'); return; }
@@ -808,18 +809,51 @@ async function cookFromFridge() {
   const prompt = `I have: ${ingredients}
 Diet: ${prefText}. ${quick ? 'Only recipes under 20 minutes.' : ''}
 Suggest 2-3 recipes using mainly these ingredients (basic pantry items like salt, oil, spices are fine).
-For each: name, short description, time, and 3 simple steps. Use emojis. Be friendly and encouraging!`;
+
+IMPORTANT: Return ONLY plain text with emojis, NOT JSON. Format each recipe like this:
+
+━━━━━━━━━━━━━━━━━━━━━━
+🍳 RECIPE NAME
+━━━━━━━━━━━━━━━━━━━━━━
+⏱️ Time: X minutes
+
+📝 Description: Brief description here
+
+🥄 Steps:
+1. First step
+2. Second step
+3. Third step
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+Be friendly and encouraging! Use emojis. Do NOT wrap response in JSON.`;
 
   try {
     const result = await callDeepSeek(prompt);
     titleEl.textContent = '🍳 Here\'s what you can make!';
-    bodyEl.innerHTML = result.replace(/\n/g, '<br>');
+    
+    // Format the text nicely
+    let formattedResult = result
+      .replace(/━━━━━━━━━━━━━━━━━━━━━━/g, '<hr style="margin: 15px 0; border: 1px solid #FFE8E8;">')
+      .replace(/🍳 ([^\n]+)/g, '<h3 style="color: #FF6B6B; margin: 10px 0 5px 0;">🍳 $1</h3>')
+      .replace(/⏱️ Time: ([^\n]+)/g, '<span style="background: #E8FAF9; padding: 3px 10px; border-radius: 20px; font-size: 12px; display: inline-block; margin: 5px 0;">⏱️ $1</span>')
+      .replace(/📝 Description: ([^\n]+)/g, '<p style="margin: 10px 0; color: #555;"><strong>📝</strong> $1</p>')
+      .replace(/🥄 Steps:/g, '<strong style="font-size: 14px; margin-top: 10px; display: block;">🥄 Steps:</strong>')
+      .replace(/(\d+\.) ([^\n]+)/g, '<li style="margin-left: 20px; margin-bottom: 5px;">$1 $2</li>')
+      .replace(/<li/g, '<ul style="margin: 5px 0;"><li')
+      .replace(/<\/li>\n<li/g, '</li><li')
+      .replace(/(<\/ul>)/g, '</ul>')
+      .replace(/\n\n/g, '<br>')
+      .replace(/\n/g, '<br>');
+    
+    bodyEl.innerHTML = formattedResult;
   } catch(e) {
     console.error(e);
     titleEl.textContent = '😕 Oops!';
     bodyEl.innerHTML = `<div class="error-box">${escapeHtml(e.message || 'Something went wrong. Please try again.')}</div>`;
   }
 }
+
 </script>
 </body>
 </html>
