@@ -1,0 +1,16 @@
+{
+  "name": "HelpMommy",
+  "short_name": "HelpMommy",
+  "description": "AI kitchen assistant - meal ideas from your fridge",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#FF6B6B",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "https://emojicdn.elk.sh/🍱",
+      "sizes": "72x72",
+      "type": "image/png"
+    }
+  ]
+}
